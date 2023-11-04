@@ -1,0 +1,127 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>YouTube Video Transcript</title>
+        <style>
+            .transcript-line {
+                position: relative;
+                padding: 4px; /* or any padding you prefer */
+                cursor: pointer;
+            }
+
+            .suggestion-box {
+                visibility: hidden;
+                position: absolute;
+                bottom: 100%;
+                left: -100px;
+                width: 400px;
+                /*white-space: nowrap;*/
+                z-index: 1;
+                color: black;
+                background-color: white;
+                border-radius: 4px;
+                transition: visibility 0.2s, opacity 0.2s ease-in-out;
+                opacity: 0;
+                text-align: center;
+            }
+
+            .transcript-line:hover .suggestion-box {
+                visibility: visible;
+                opacity: 1;
+            }
+
+            #transcript {
+                margin-top: 20px;
+                width: 40%;
+                padding: 10px;
+                text-align: center;
+            }
+            input, button {
+                margin: 10px 0;
+                padding: 10px;
+                width: 50%;
+                box-sizing: border-box; /* Include padding in the width */
+            }
+            input {
+                font-size: 16px;
+            }
+            button {
+                background-color: #4CAF50; /* A nice green */
+                color: white;
+                border: none;
+                cursor: pointer;
+                font-size: 18px;
+                transition: background-color 0.3s ease;
+            }
+            button:hover {
+                background-color: #45a049;
+            }
+        </style>
+        <script>
+            async function fetchTranscript() {
+
+                // Prevent the form from submitting normally
+                event.preventDefault();
+                
+                // Get the video URL from the input field
+                let videoUrl = document.getElementById('youtube-url').value;
+                
+                let isCompleted= false;
+                while (!isCompleted){
+                // Send a POST request to the server
+                let response = await fetch('http://127.0.0.1:5001/get_transcript', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ video_url: videoUrl })
+                });
+                
+                // Parse the JSON response
+                let data = await response.json();
+                if (data.completed)
+                    break;
+                console.log(data.completed)
+
+                let transcriptDiv = document.getElementById('transcript');
+                if(data.error) {
+                    transcriptDiv.innerText = data.error;
+                } else {
+                    // Format and display the transcript text with color and hover functionality
+                    // let suggestionBoxHtml = cue.label ? `<span class="suggestion-box" style="background-color: ${cue.color};">${cue.label}</span>` : '';
+                    
+                    transcriptDiv.innerHTML = data.map(cue => {
+                        return `
+                        <div class="transcript-line" style="background-color: ${cue.color};">
+                            ${cue.text}
+                            <span class="suggestion-box" style="background-color: #BDB2FF;">${cue.fallacy}</span>
+                        </div>`;  // Include a suggestion box for each line
+                    }).join('');
+                    
+                    // Add hover functionality to each line
+                    document.querySelectorAll('.transcript-line').forEach(line => {
+                        let suggestionBox = line.querySelector('.suggestion-box');
+                        line.onmouseenter = () => suggestionBox.style.visibility = 'visible';
+                        line.onmouseleave = () => suggestionBox.style.visibility = 'hidden';
+                    });
+                }
+
+            }
+            }
+
+
+        </script>
+    </head>
+    <body>
+        <center>
+        <h1>YouTube Video Transcript Fetcher</h1>
+        <form onsubmit="fetchTranscript()">
+            <input type="text" id="youtube-url" placeholder="Enter YouTube Video URL" required>
+            <button type="submit">Get Transcript</button>
+        </form>
+        <div id="transcript" style="white-space: normal;"></div>
+        </center>
+    </body>
+    </html>
