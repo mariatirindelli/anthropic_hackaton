@@ -48,7 +48,7 @@
                 font-size: 16px;
             }
             button {
-                background-color: #4CAF50; /* A nice green */
+                background-color: #3982b8; /* A nice green */
                 color: white;
                 border: none;
                 cursor: pointer;
@@ -56,7 +56,7 @@
                 transition: background-color 0.3s ease;
             }
             button:hover {
-                background-color: #45a049;
+                background-color: #ee6b6e;
             }
         </style>
         <script>
@@ -96,7 +96,7 @@
                         return `
                         <div class="transcript-line" style="background-color: ${cue.color};">
                             ${cue.text}
-                            <span class="suggestion-box" style="background-color: #BDB2FF;">${cue.fallacy}</span>
+                            <span class="suggestion-box" style="background-color: #8dcfec;">${cue.fallacy}</span>
                         </div>`;  // Include a suggestion box for each line
                     }).join('');
                     
@@ -116,7 +116,7 @@
     </head>
     <body>
         <center>
-        <h1>YouTube Video Transcript Fetcher</h1>
+        <h1>ArguMend</h1>
         <form onsubmit="fetchTranscript()">
             <input type="text" id="youtube-url" placeholder="Enter YouTube Video URL" required>
             <button type="submit">Get Transcript</button>
