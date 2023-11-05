@@ -1,12 +1,21 @@
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 from youtube_transcript_api import YouTubeTranscriptApi
-import time
-import sys
-import random
 
 # Function to download and save the transcript with timestamps
 def download_transcript(youtube_url):
-    # Extract the video ID from the URL
+    """
+    Download the transcript with timestamps for a YouTube video.
+
+    Parameters
+    ----------
+    youtube_url : str
+        The URL of the YouTube video.
+
+    Returns
+    -------
+    dict or None
+        A dictionary containing the transcript with timestamps or None if an error occurs during the download process.
+    """
     video_id = youtube_url.split('watch?v=')[-1]
 
     if ("/shorts/") in youtube_url:
@@ -29,11 +38,24 @@ def download_transcript(youtube_url):
     return transcript_with_timestamps
 
 def save_raw_file(transcript_with_timestamps, out_file):
+    """
+    Save the raw transcript with timestamps to a file.
+
+    Parameters
+    ----------
+    transcript_with_timestamps : dict
+        A dictionary containing the transcript with timestamps.
+    out_file : str
+        The name of the output file.
+
+    Returns
+    -------
+    None
+    """
     raw_text = " ".join([transcript_with_timestamps[timestamp] for timestamp in transcript_with_timestamps.keys()])
     with open(out_file, 'w') as fid:
         fid.write(raw_text)
 
-# Function to chunk the transcript into sliding windows
 def create_sliding_windows(transcript_with_timestamps, window_size):
     """
     transcript: dictionary with timestamps as keys and text as values
@@ -45,25 +67,28 @@ def create_sliding_windows(transcript_with_timestamps, window_size):
 
     return windows
 
-def dummy_divide_in_paragraph(raw_input, antropic_instance = None):
-    parts = [raw_input[i:i + len(raw_input) // 4] for i in range(0, len(raw_input), len(raw_input) // 4)]
-    return parts
-
-def dummy_check_for_fallacies(chunk_text, antropic_instance = None):
-    if random.random() < 0.5:
-           return 1, "Random Res"
-    else:
-        return 0, ""
-        
-
 def divide_in_paragraphs(raw_input, antropic_instance = None):
+    """
+    Divide the transcript with timestamps into sliding windows.
+
+    Parameters
+    ----------
+    transcript_with_timestamps : dict
+        A dictionary containing the transcript with timestamps.
+    window_size : int
+        The number of lines to include in each window.
+
+    Returns
+    -------
+    list
+        A list of strings representing the sliding windows of the transcript.
+    """
     local_instance = antropic_instance is None
     if (local_instance):
         antropic_instance = Anthropic(
         api_key="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",)
     
     #prompt = f"{HUMAN_PROMPT}The following is a transcription of a video, please read and fix minor transcription errors, and divide the transcription into coherent chunks changing the text:\n\n{raw_input}{AI_PROMPT}"
-   
     prompt = f"{HUMAN_PROMPT}The following is a transcription of a video, please read and fix minor transcription errors, then discard incomplete sentences in the beginning and the end of the transcription, and divide the transcription into coherent chunks of around 100 words without changing the text:\n\n{raw_input}{AI_PROMPT}"
     response = antropic_instance.completions.create(
         model="claude-2",  # or the latest model available
@@ -76,8 +101,6 @@ def divide_in_paragraphs(raw_input, antropic_instance = None):
     if (local_instance):
         antropic_instance.close()
 
-
-    # Clean up the text to remove the text introduced by the assistant
     first_word_idx = text_paragraphs.find("\n")
     text_paragraphs = text_paragraphs[first_word_idx::]
 
@@ -85,6 +108,22 @@ def divide_in_paragraphs(raw_input, antropic_instance = None):
     return [item for item in processed_paragraphs if len(item)>3]
 
 def check_for_fallacies(chunk_text, antropic_instance = None):
+    """
+    Check for logical fallacies in the chunk text.
+
+    Parameters
+    ----------
+    chunk_text : str
+        The text to be checked for logical fallacies.
+    antropic_instance : Anthropic, optional
+        An instance of the Anthropic API, by default None.
+
+    Returns
+    -------
+    tuple
+        A tuple containing a binary value indicating the presence of fallacies and the text with fallacy details.
+    """
+    
     local_instance = antropic_instance is None
     if (local_instance):
         antropic_instance = Anthropic(
@@ -106,26 +145,3 @@ def check_for_fallacies(chunk_text, antropic_instance = None):
         has_fallacies = 0
         text=""
     return has_fallacies, text
-
-def divide_in_paragraphs_fun(video_url):
-    transcript = download_transcript(video_url)
-    windows = create_sliding_windows(transcript, 100)
-
-    paragraphed_text = ""
-    for window in windows:
-        res = divide_in_paragraphs(window)
-
-        print(window)
-        print("-------")
-        print(res)
-        paragraphed_text += "\n" + res
-        #print(paragraphed_text)
-
-
-
-if __name__ == '__main__':
-    video_url = "https://www.youtube.com/watch?v=855Am6ovK7s"
-    divide_in_paragraphs_fun(video_url)
-
-
-    # app.run(debug=True)
