@@ -14,7 +14,19 @@ paragraph_index = 0
 paragraph_lists = []
 
 def process_paragraph(par):
-    
+    """
+    Process a paragraph, check for fallacies and saves the result into a dict
+
+    Parameters
+    ----------
+    par : str
+        The paragraph to be processed.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the processed data, including the paragraph text, fallacy label, and fallacy details.
+    """
     res = dict()
     has_fallacy, response = utils.check_for_fallacies(par)
     res["text"] = par
@@ -24,11 +36,27 @@ def process_paragraph(par):
 
 @app.route('/')
 def index():
+    """
+    Render the index.html template.
+
+    Returns
+    -------
+    str
+        The rendered template content.
+    """
     html_template = open("index.html", "r").read()
     return render_template_string(html_template)
 
 @app.route('/get_transcript', methods=['POST'])
 def get_transcript():
+    """
+    Handle the '/get_transcript' route for POST requests and process the video transcript.
+
+    Returns
+    -------
+    dict
+        A JSON response containing the processed transcript data or an error message if an exception occurs.
+    """
     global call_number
     global transcript_windows
     global colored_transcript

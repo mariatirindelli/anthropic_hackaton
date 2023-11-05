@@ -1,6 +1,6 @@
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 from youtube_transcript_api import YouTubeTranscriptApi
-
+from os import environ as env
 # Function to download and save the transcript with timestamps
 def download_transcript(youtube_url):
     """
@@ -86,7 +86,7 @@ def divide_in_paragraphs(raw_input, antropic_instance = None):
     local_instance = antropic_instance is None
     if (local_instance):
         antropic_instance = Anthropic(
-        api_key="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",)
+        api_key=env["ANTHROPIC_API_KEY"],)
     
     #prompt = f"{HUMAN_PROMPT}The following is a transcription of a video, please read and fix minor transcription errors, and divide the transcription into coherent chunks changing the text:\n\n{raw_input}{AI_PROMPT}"
     prompt = f"{HUMAN_PROMPT}The following is a transcription of a video, please read and fix minor transcription errors, then discard incomplete sentences in the beginning and the end of the transcription, and divide the transcription into coherent chunks of around 100 words without changing the text:\n\n{raw_input}{AI_PROMPT}"
@@ -127,7 +127,7 @@ def check_for_fallacies(chunk_text, antropic_instance = None):
     local_instance = antropic_instance is None
     if (local_instance):
         antropic_instance = Anthropic(
-        api_key="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",)
+        api_key=env["ANTHROPIC_API_KEY"],)
 
     prompt = f"{HUMAN_PROMPT} Identify if there are logical fallacies. If it exists, list the fallacies by bullet point, and explain why that fallacy exists. If there is no fallacy, just say N/A and nothing else: \n\n{chunk_text}{AI_PROMPT}"
     
@@ -145,3 +145,5 @@ def check_for_fallacies(chunk_text, antropic_instance = None):
         has_fallacies = 0
         text=""
     return has_fallacies, text
+
+print("ANTHROPIC_API_KEY: ", env["ANTHROPIC_API_KEY"])
