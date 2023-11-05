@@ -8,6 +8,9 @@ import random
 def download_transcript(youtube_url):
     # Extract the video ID from the URL
     video_id = youtube_url.split('watch?v=')[-1]
+
+    if ("/shorts/") in youtube_url:
+        video_id= youtube_url.split('/shorts/')[-1]
     transcript_with_timestamps = {}
     try:
         # Download the transcript that includes timestamps
@@ -58,7 +61,9 @@ def divide_in_paragraphs(raw_input, antropic_instance = None):
     if (local_instance):
         antropic_instance = Anthropic(
         api_key="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",)
-
+    
+    #prompt = f"{HUMAN_PROMPT}The following is a transcription of a video, please read and fix minor transcription errors, and divide the transcription into coherent chunks changing the text:\n\n{raw_input}{AI_PROMPT}"
+   
     prompt = f"{HUMAN_PROMPT}The following is a transcription of a video, please read and fix minor transcription errors, then discard incomplete sentences in the beginning and the end of the transcription, and divide the transcription into coherent chunks of around 100 words without changing the text:\n\n{raw_input}{AI_PROMPT}"
     response = antropic_instance.completions.create(
         model="claude-2",  # or the latest model available
@@ -85,10 +90,10 @@ def check_for_fallacies(chunk_text, antropic_instance = None):
         antropic_instance = Anthropic(
         api_key="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",)
 
-    prompt = f"{HUMAN_PROMPT}Identify if there are logical fallacies. If it exists, list the fallacies by bullet point, and explain why that fallacy exists. If there is no fallacy, just say N/A and nothing else:\n\n{chunk_text}{AI_PROMPT}"
+    prompt = f"{HUMAN_PROMPT} Identify if there are logical fallacies. If it exists, list the fallacies by bullet point, and explain why that fallacy exists. If there is no fallacy, just say N/A and nothing else: \n\n{chunk_text}{AI_PROMPT}"
     
     response = antropic_instance.completions.create(
-        model="claude-instant-1.2",  # or the latest model available
+        model="claude-2",  # or the latest model available
         max_tokens_to_sample=30000,
         prompt=prompt
     )

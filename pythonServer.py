@@ -7,7 +7,7 @@ import utils
 
 app = Flask(__name__)
 
-
+# Hi Csabi
 
 def ANTRHOPIC_PLACEHOLDER(transcript):
     """
@@ -20,10 +20,7 @@ def ANTRHOPIC_PLACEHOLDER(transcript):
     paragraph_lists.extend(paragraphs)
     
     has_fallacy, response = utils.check_for_fallacies(paragraph_lists[paragraph_index])
-    
-    
     res = []
-    
     
     print(len(paragraphs))
     for par in paragraphs:
@@ -64,6 +61,7 @@ FALLACIES = [
     "Appeal to Fear",
     "Appeal to Flattery",
 ]
+
 COLORS = ["#ffffff", "#FFADAD", "#FFD6A5", "#FDFFB6", "#CAFFBF", "#9BF6FF", "#A0C4FF", "#BDB2FF", "#FFC6FF"]
 
 call_number = 0
@@ -110,7 +108,7 @@ def get_transcript():
         
         #if (call_number >= len(transcript_windows)):
             #return jsonify({"completed": "True"})
-        if (call_number <= len(transcript_windows) and paragraph_index>=len(paragraph_lists)):
+        if (call_number < len(transcript_windows) and paragraph_index>=len(paragraph_lists)):
             #current_window = ANTRHOPIC_PLACEHOLDER(transcript_windows[call_number])
             paragraphs = utils.divide_in_paragraphs(transcript_windows[call_number], antropic_instance = None)
             paragraph_lists.extend(paragraphs)
@@ -118,6 +116,11 @@ def get_transcript():
         call_number += 1
 
         if (paragraph_index) >= len(paragraph_lists):
+            call_number = 0
+            paragraph_index = 0
+            paragraph_lists = []
+            transcript_windows = []
+            colored_transcript=[]
             return jsonify({"completed": "True"})
 
         entry = process_paragraph(paragraph_lists[paragraph_index])
