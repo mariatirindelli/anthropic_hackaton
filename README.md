@@ -1,1 +1,8 @@
 # anthropic_hackaton
+
+The application automatically fetches captions from you tube videos based on the video url. The application then cleans up the transcript to divide into coherent paragraphs and correct minor grammar mistakes. It then runs logical fallacy detector using claude APIs on the processed chunks displays the paragraphs, and highlight them in red if any fallacy was detected. The application furhter displays an explanation of the detected fallacy to inform the user. 
+
+The application is structured as follows: 
+- html/css front-end defines the UI. The UI is composed of a text field where the URL of the youtube video can be pasted, and a push button. Clickin the button triggers a POST request to the get_transcript function to be send to the server, passing the url as an input and expecting the processed transcript as a response, together with the result of the fallacy detector. The text is processed in batches, and the result of each batch is displayed as soon as available.
+- The backend is a python-based server. The server defines the "get_transcript" method. Within the method the function first check whether the youtube transcript has already be downloaded, downloads and divides into chunks if it had not. It then proceed to take the next available chunk, corrects eventual mistakes and divides it into paragraphs. The function then process the next paragraph to identify fallacies and returns a json list of the available paragraphs containing the paragraph text, a boolean value identifying the presence of fallacies and a free text containing the fallacy description.
+- Text downloading, chunking, division in paragraphs and text fallacy detections are provided as single functions and defined in the utils.py
