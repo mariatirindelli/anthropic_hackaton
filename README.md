@@ -1,4 +1,4 @@
-# anthropic_hackaton
+# ArguMend
 
 The application automatically fetches captions from you tube videos based on the video url. The application then cleans up the transcript to divide into coherent paragraphs and correct minor grammar mistakes. It then runs logical fallacy detector using claude APIs on the processed text, and displays it highlighting them in red if any fallacy was detected. The application furhter displays an explanation of the detected fallacy to inform the user. 
 
